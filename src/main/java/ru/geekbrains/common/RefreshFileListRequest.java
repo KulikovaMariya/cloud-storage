@@ -1,7 +1,7 @@
 package ru.geekbrains.common;
 
-import java.io.Serializable;
-
-public class RefreshFileListRequest implements Serializable {
-
+public class RefreshFileListRequest extends CommonRequest {
+    public RefreshFileListRequest(String username) {
+        this.username = username;
+    }
 }

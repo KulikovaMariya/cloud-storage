@@ -2,16 +2,14 @@ package ru.geekbrains.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import ru.geekbrains.common.DeleteFileRequest;
-import ru.geekbrains.common.DownloadFileRequest;
-import ru.geekbrains.common.RefreshFileListRequest;
-import ru.geekbrains.common.SendFileRequest;
+import ru.geekbrains.common.*;
 
 public class ServerMainHandler extends ChannelInboundHandlerAdapter {
     private DownloadFileRequestHandler downloadFileRequestHandler = new DownloadFileRequestHandler();
     private SendFileRequestHandler sendFileRequestHandler = new SendFileRequestHandler();
     private DeleteFileRequestHandler deleteFileRequestHandler = new DeleteFileRequestHandler();
     private RefreshFileListRequestHandler refreshFileListRequestHandler = new RefreshFileListRequestHandler();
+    private AuthorizeRequestHandler authorizeRequestHandler = new AuthorizeRequestHandler();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -23,6 +21,8 @@ public class ServerMainHandler extends ChannelInboundHandlerAdapter {
             deleteFileRequestHandler.channelRead(ctx, (DeleteFileRequest) msg);
         } else if(msg instanceof RefreshFileListRequest) {
             refreshFileListRequestHandler.readChannel(ctx, (RefreshFileListRequest) msg);
+        } else if (msg instanceof AuthorizeRequest) {
+            authorizeRequestHandler.readChannel(ctx, (AuthorizeRequest) msg);
         }
     }
 }

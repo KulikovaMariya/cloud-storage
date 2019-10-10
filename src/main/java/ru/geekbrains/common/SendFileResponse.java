@@ -5,17 +5,16 @@ import java.io.Serializable;
 public class SendFileResponse implements Serializable {
     private String sendFileName;
     private boolean status;
-    private String statusDiscription;
+    private String statusDescription;
 
     public SendFileResponse(String sendFileName, boolean status) {
-        this.sendFileName = sendFileName;
-        this.status = status;
+        this(sendFileName, status, "SUCCESS");
     }
 
-    public SendFileResponse(String sendFileName, boolean status, String statusDiscription) {
+    public SendFileResponse(String sendFileName, boolean status, String statusDescription) {
         this.sendFileName = sendFileName;
         this.status = status;
-        this.statusDiscription = statusDiscription;
+        this.statusDescription = statusDescription;
     }
 
     public boolean isStatus() {
@@ -23,7 +22,7 @@ public class SendFileResponse implements Serializable {
     }
 
     public String getStatusDescription() {
-        return statusDiscription;
+        return statusDescription;
     }
 
     public String getSendFileName() {

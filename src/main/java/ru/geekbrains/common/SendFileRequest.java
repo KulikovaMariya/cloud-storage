@@ -1,28 +1,17 @@
 package ru.geekbrains.common;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.file.Files;
-
-import java.nio.file.Paths;
-
-public class SendFileRequest implements Serializable {
-    private String name;
-    private static String DIR = "C:\\coding\\cloud-storage\\cloud-storage\\clientDir\\";
+public class SendFileRequest extends CommonRequest {
+    private String fileName;
     private byte[] data;
 
-    public SendFileRequest(String name) {
-        this.name = name;
-        String temp = DIR + name;
-        try {
-            this.data = Files.readAllBytes(Paths.get(temp));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public SendFileRequest(String username, String fileName, byte[] data) {
+        this.username = username;
+        this.fileName = fileName;
+        this.data = data;
     }
 
-    public String getName() {
-        return name;
+    public String getFileName() {
+        return fileName;
     }
 
     public byte[] getData() {

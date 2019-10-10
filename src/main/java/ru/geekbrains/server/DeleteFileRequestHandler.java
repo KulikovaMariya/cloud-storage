@@ -10,10 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class DeleteFileRequestHandler {
-    private static String SERVER_DIR = "C:\\coding\\cloud-storage\\cloud-storage\\serverDir\\";
-
     public void channelRead(ChannelHandlerContext ctx, DeleteFileRequest deleteFileRequest) throws IOException {
-        Path path = Paths.get(SERVER_DIR + deleteFileRequest.getFileName());
+        Path path = Paths.get(Server.SERVER_DIR + deleteFileRequest.getUsername() + "\\" + deleteFileRequest.getFileName());
         if (Files.exists(path)) {
             try {
                 Files.delete(path);

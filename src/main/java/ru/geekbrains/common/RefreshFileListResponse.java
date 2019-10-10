@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RefreshFileListResponse implements Serializable {
-
     private List<String> serverFileList = new ArrayList<>();
 
     public List<String> getServerFileList() {

@@ -1,12 +1,10 @@
 package ru.geekbrains.common;
 
-import java.io.Serializable;
-
-public class DownloadFileRequest implements Serializable {
-
+public class DownloadFileRequest extends CommonRequest {
     private String fileName;
 
-    public DownloadFileRequest(String fileName) {
+    public DownloadFileRequest(String username, String fileName) {
+        this.username = username;
         this.fileName = fileName;
     }
 

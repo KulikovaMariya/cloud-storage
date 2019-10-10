@@ -10,11 +10,17 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class RefreshFileListRequestHandler {
 
-    private Path serverDir = Paths.get("C:\\coding\\cloud-storage\\cloud-storage\\serverDir");
-
     public void readChannel(ChannelHandlerContext ctx, RefreshFileListRequest msg) throws IOException {
         final RefreshFileListResponse refreshFileListResponse = new RefreshFileListResponse();
-        Files.walkFileTree(serverDir, new FileVisitor<Path>() {
+        Path path = Paths.get(Server.SERVER_DIR + msg.getUsername());
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectory(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        Files.walkFileTree(path, new FileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 return FileVisitResult.CONTINUE;

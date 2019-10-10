@@ -8,8 +8,7 @@ public class DeleteFileResponse implements Serializable {
     private String statusDescription;
 
     public DeleteFileResponse(String fileName, boolean status) {
-        this.fileName = fileName;
-        this.status = status;
+        this(fileName, status, "SUCCESS");
     }
 
     public DeleteFileResponse(String fileName, boolean status, String statusDescription) {

@@ -14,6 +14,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 
 public class Server {
     private static final int PORT = 8080;
+    public static final String SERVER_DIR = "C:\\coding\\cloud-storage\\cloud-storage\\serverDir\\";
 
     public void run() throws InterruptedException {
         EventLoopGroup boss = new NioEventLoopGroup();

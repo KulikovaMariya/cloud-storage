@@ -1,12 +1,10 @@
 package ru.geekbrains.common;
 
-import java.io.Serializable;
-
-public class DeleteFileRequest implements Serializable {
-
+public class DeleteFileRequest extends CommonRequest {
     private String fileName;
 
-    public DeleteFileRequest(String fileName) {
+    public DeleteFileRequest(String username, String fileName) {
+        this.username = username;
         this.fileName = fileName;
     }
 

@@ -1,9 +1,6 @@
 package ru.geekbrains.client;
 
-import ru.geekbrains.common.DeleteFileRequest;
-import ru.geekbrains.common.DownloadFileRequest;
-import ru.geekbrains.common.RefreshFileListRequest;
-import ru.geekbrains.common.SendFileRequest;
+import ru.geekbrains.common.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,9 +9,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.List;
 
-public class MainWindow extends JFrame implements ResponseListener{
+public class MainWindow extends JFrame{
     private Network network;
 
     private JPanel clientMainPanel;
@@ -41,9 +37,12 @@ public class MainWindow extends JFrame implements ResponseListener{
     private JLabel clientLabel;
     private JLabel serverLabel;
 
-    private final static Path PATH = Paths.get("C:\\coding\\cloud-storage\\cloud-storage\\clientDir");
+    private String PATH;
+    private final static String BASE_DIRECTORY = "C:\\coding\\cloud-storage\\cloud-storage\\clientDir\\";
+    private String username;
 
-    public MainWindow() {
+    public MainWindow(Network network) {
+        this.network = network;
         setTitle("Cloud storage");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -76,14 +75,19 @@ public class MainWindow extends JFrame implements ResponseListener{
         clientSendFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                network.sendRequestAsync(new SendFileRequest(clientFileList.getSelectedValue()));
+                try {
+                    byte[] data = Files.readAllBytes(Paths.get(PATH + clientFileList.getSelectedValue()));
+                    network.sendRequestAsync(new SendFileRequest(username, clientFileList.getSelectedValue(), data));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 
         clientDeleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Path selectedPath = Paths.get(PATH.toString() + "\\" + clientFileList.getSelectedValue());
+                Path selectedPath = Paths.get(PATH + clientFileList.getSelectedValue());
                 if (Files.exists(selectedPath)) {
                     try {
                         Files.delete(selectedPath);
@@ -134,21 +138,21 @@ public class MainWindow extends JFrame implements ResponseListener{
         serverDownloadFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                network.sendRequestAsync(new DownloadFileRequest(serverFileList.getSelectedValue()));
+                network.sendRequestAsync(new DownloadFileRequest(username, serverFileList.getSelectedValue()));
             }
         });
 
         serverDeleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                network.sendRequestAsync(new DeleteFileRequest(serverFileList.getSelectedValue()));
+                network.sendRequestAsync(new DeleteFileRequest(username, serverFileList.getSelectedValue()));
             }
         });
 
         serverRefreshFileListButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                network.sendRequestAsync(new RefreshFileListRequest());
+                network.sendRequestAsync(new RefreshFileListRequest(username));
             }
         });
 
@@ -162,43 +166,39 @@ public class MainWindow extends JFrame implements ResponseListener{
 
 
     // To process responses from server
-    @Override
-    public void onRefreshFileList(List<String> fileList) {
+    public void onRefreshFileList(RefreshFileListResponse msg) {
         serverListModel.clear();
-        for (String s : fileList) {
+        for (String s : msg.getServerFileList()) {
             serverListModel.addElement(s);
         }
     }
 
-    @Override
-    public void onDeleteFile(String fileName, boolean status, String statusDescription) {
-        if (status) {
-            serverListModel.removeElement(fileName);
-            JOptionPane.showMessageDialog(MainWindow.this, "Файл " + fileName + " удалён");
+    public void onDeleteFile(DeleteFileResponse msg) {
+        if (msg.isStatus()) {
+            serverListModel.removeElement(msg.getFileName());
+            JOptionPane.showMessageDialog(MainWindow.this, "Файл " + msg.getFileName() + " удалён");
         } else {
-            JOptionPane.showMessageDialog(MainWindow.this, statusDescription,
+            JOptionPane.showMessageDialog(MainWindow.this, msg.getStatusDescription(),
                     "Невозможно удалить файл", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    @Override
-    public void onSendFile(String sendFileName, boolean status, String statusDescription) {
-        if (status) {
-            serverListModel.addElement(sendFileName);
-            JOptionPane.showMessageDialog(MainWindow.this, "Файл " + sendFileName + " загружен");
+    public void onSendFile(SendFileResponse msg) {
+        if (msg.isStatus()) {
+            serverListModel.addElement(msg.getSendFileName());
+            JOptionPane.showMessageDialog(MainWindow.this, "Файл " + msg.getSendFileName() + " загружен");
         } else {
-            JOptionPane.showMessageDialog(MainWindow.this, statusDescription,
+            JOptionPane.showMessageDialog(MainWindow.this, msg.getStatusDescription(),
                     "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    @Override
-    public void onDownloadFile(String fileName, byte[] data) {
-        String fullPath = PATH + "\\" + fileName;
+    public void onDownloadFile(DownloadFileResponse msg) {
+        String fullPath = PATH + msg.getFileName();
         if (!Files.exists(Paths.get(fullPath))) {
             try {
-                Files.write(Paths.get(fullPath), data, StandardOpenOption.CREATE);
-                clientListModel.addElement(fileName);
+                Files.write(Paths.get(fullPath), msg.getData(), StandardOpenOption.CREATE);
+                clientListModel.addElement(msg.getFileName());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -208,19 +208,24 @@ public class MainWindow extends JFrame implements ResponseListener{
             }
     }
 
-    public void setNetwork(Network network) {
-        this.network = network;
-    }
-
-    public void initialize() {
+    public void initialize(String username) {
+        this.username = username;
+        PATH = BASE_DIRECTORY + username + "\\";
+        if (!Files.exists(Paths.get(PATH))) {
+            try {
+                Files.createDirectory(Paths.get(PATH));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         refreshClientFileList();
-        network.sendRequestSync(new RefreshFileListRequest());
+        network.sendRequestSync(new RefreshFileListRequest(username));
     }
 
     private void refreshClientFileList() {
         clientListModel.clear();
         try {
-            Files.walkFileTree(PATH, new FileVisitor<Path>() {
+            Files.walkFileTree(Paths.get(PATH), new FileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     return FileVisitResult.CONTINUE;

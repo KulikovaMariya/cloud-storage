@@ -10,18 +10,16 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Network {
     private static final int PORT = 8080;
-    private final ResponseListener responseListener;
+    private final BlockingQueue eventQueue = new LinkedBlockingQueue();
 
     private Channel currentChannel;
     private CountDownLatch countDownLatch = new CountDownLatch(1);
-
-    public Network(ResponseListener responseListener) {
-        this.responseListener = responseListener;
-    }
 
     public void run() {
         EventLoopGroup group = new NioEventLoopGroup();
@@ -36,7 +34,7 @@ public class Network {
                     ch.pipeline().addLast(
                             new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
                             new ObjectEncoder(),
-                            new ClientMainHandler(responseListener));
+                            new ClientMainHandler(eventQueue));
 
                 }
             });
@@ -74,6 +72,8 @@ public class Network {
         }
     }
 
-
+    public BlockingQueue getEventQueue() {
+        return eventQueue;
+    }
 }
 
