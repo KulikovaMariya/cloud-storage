@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LoginDialog extends JDialog {
-    private Network network;
+    private Controller controller;
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JLabel userLabel;
@@ -17,9 +17,9 @@ public class LoginDialog extends JDialog {
     private JButton loginButton;
     private JButton cancelButton;
 
-    public LoginDialog(Frame parent, final Network network) {
+    public LoginDialog(Frame parent, final Controller controller) {
         super(parent, "Логин", true);
-        this.network = network;
+        this.controller = controller;
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
@@ -56,7 +56,7 @@ public class LoginDialog extends JDialog {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                network.sendRequestSync(new AuthorizeRequest(usernameField.getText(), new String(passwordField.getPassword())));
+                controller.sendAuthorizeRequest(usernameField.getText(), new String(passwordField.getPassword()));
             }
         });
 

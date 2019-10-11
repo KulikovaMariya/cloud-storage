@@ -30,7 +30,7 @@ public class Controller {
         }).start();
 
         this.mainWindow = new MainWindow(this);
-        this.loginDialog = new LoginDialog(mainWindow, network);
+        this.loginDialog = new LoginDialog(mainWindow, this);
 
         startEventProcessor();
 
@@ -165,5 +165,9 @@ public class Controller {
         }
         refreshFileListClient();
         network.sendRequestSync(new RefreshFileListRequest(username));
+    }
+
+    public void sendAuthorizeRequest(String username, String password) {
+        network.sendRequestSync(new AuthorizeRequest(username, password));
     }
 }
