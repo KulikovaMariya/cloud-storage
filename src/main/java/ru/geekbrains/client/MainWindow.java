@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -38,7 +39,7 @@ public class MainWindow extends JFrame{
     private JLabel serverLabel;
 
     private String PATH;
-    private final static String BASE_DIRECTORY = "C:\\coding\\cloud-storage\\cloud-storage\\clientDir\\";
+    private final static String BASE_DIRECTORY = "clientDir" + File.separator;
     private String username;
 
     public MainWindow(Network network) {
@@ -210,7 +211,7 @@ public class MainWindow extends JFrame{
 
     public void initialize(String username) {
         this.username = username;
-        PATH = BASE_DIRECTORY + username + "\\";
+        PATH = BASE_DIRECTORY + username + File.separator;
         if (!Files.exists(Paths.get(PATH))) {
             try {
                 Files.createDirectory(Paths.get(PATH));
