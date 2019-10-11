@@ -1,7 +1,5 @@
 package ru.geekbrains.client;
 
-import ru.geekbrains.common.AuthorizeRequest;
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
